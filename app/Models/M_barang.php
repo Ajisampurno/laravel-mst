@@ -13,4 +13,12 @@ class M_barang extends Model
         'nama',
         'harga'
     ];
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            $model->kode = 'C' . str_pad(M_barang::max('id') + 1, 3, '0', STR_PAD_LEFT);
+        });
+    }
 }
