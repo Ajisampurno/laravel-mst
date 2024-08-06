@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
+Route::resource('customers', CustomerController::class);
 // Routes that require authentication
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -31,7 +32,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::resource('transaksis', TransaksiController::class);
 
-    Route::resource('customers', CustomerController::class);
 
     Route::resource('barangs', BarangController::class);
 });
