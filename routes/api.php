@@ -22,8 +22,8 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 Route::resource('customers', CustomerController::class);
-// Routes that require authentication
-Route::middleware('auth:sanctum')->group(function () {
+
+Route::middleware('auth:api')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
