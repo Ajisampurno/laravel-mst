@@ -22,14 +22,16 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 Route::resource('customers', CustomerController::class);
-
-Route::resource('transaksis', TransaksiController::class);
-Route::resource('barangs', BarangController::class);
-
-Route::middleware('auth:api')->group(function () {
+// Routes that require authentication
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 
     Route::post('logout', [AuthController::class, 'logout']);
+
+    Route::resource('transaksis', TransaksiController::class);
+
+
+    Route::resource('barangs', BarangController::class);
 });
