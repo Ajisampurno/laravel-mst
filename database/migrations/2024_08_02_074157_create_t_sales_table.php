@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('t_sales', function (Blueprint $table) {
             $table->id();
-            $table->string('kode', 15)->unique();
+            $table->string('kode', 15);
             $table->dateTime('tgl');
             $table->integer('cust_id');
             $table->decimal('subtotal', 15, 2);

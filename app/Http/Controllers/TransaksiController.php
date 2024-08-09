@@ -15,6 +15,7 @@ class TransaksiController extends Controller
     {
         $transaksis = T_sales::select(
             't_sales.id',
+            't_sales.kode as code',
             'tgl',
             'm_customers.nama',
             't_sales_dets.qty',
@@ -26,6 +27,7 @@ class TransaksiController extends Controller
             ->join('m_customers', 'm_customers.id', '=', 't_sales.cust_id')
             ->join('t_sales_dets', 't_sales_dets.sales_id', '=', 't_sales.id')
             ->get();
+
 
         $grandTotal = $transaksis->sum('total_bayar');
 
@@ -45,49 +47,61 @@ class TransaksiController extends Controller
     {
         // Validate the incoming request
         $request->validate([
-            'kode' => 'required',
+            'kode' => 'required|string',
             'tgl' => 'required|date',
-            'cust_id' => 'required',
+            'cust_id' => 'required|integer',
             'subtotal' => 'required|numeric',
-            'diskon' => 'required|numeric',
+            'diskon' => 'nullable|numeric',
             'ongkir' => 'nullable|numeric',
             'total_bayar' => 'required|numeric',
             'cartItems' => 'required|array',
-            'cartItems.*.barang_id' => 'required',
+            'cartItems.*.barang_id' => 'required|integer',
             'cartItems.*.diskon_nilai' => 'required|numeric',
-            'cartItems.*.diskon_pct' => 'required|numeric',
+            'cartItems.*.diskon_pct' => 'nullable|numeric',
             'cartItems.*.harga_bandrol' => 'required|numeric',
             'cartItems.*.harga_diskon' => 'required|numeric',
             'cartItems.*.qty' => 'required|integer',
             'cartItems.*.total' => 'required|numeric',
         ]);
 
-        // Create the transaction
-        $transaction = T_sales::create([
-            'kode' => $request->kode,
-            'tgl' => $request->tgl,
-            'cust_id' => $request->cust_id,
-            'subtotal' => $request->subtotal,
-            'diskon' => $request->diskon,
-            'ongkir' => $request->ongkir ?? 0,
-            'total_bayar' => $request->total_bayar,
-        ]);
+        // Start a database transaction
+        DB::beginTransaction();
 
-        // Create the transaction items
-        foreach ($request->cartItems as $item) {
-            T_sales_det::create([
-                'sales_id' => T_sales::max('id') + 1,
-                'barang_id' => $item['barang_id'],
-                'harga_bandrol' => $item['harga_bandrol'],
-                'qty' => $item['qty'],
-                'diskon_pct' => $item['diskon_pct'],
-                'diskon_nilai' => $item['diskon_nilai'],
-                'harga_diskon' => $item['harga_diskon'],
-                'total' => $item['total'],
+        try {
+            // Create the transaction
+            $transaction = T_sales::create([
+                'kode' => $request->kode,
+                'tgl' => $request->tgl,
+                'cust_id' => $request->cust_id,
+                'subtotal' => $request->subtotal,
+                'diskon' => $request->diskon ?? 0,
+                'ongkir' => $request->ongkir ?? 0,
+                'total_bayar' => $request->total_bayar,
             ]);
-        }
 
-        return response()->json(['message' => 'Transaction created successfully'], 201);
+            // Create the transaction items
+            foreach ($request->cartItems as $item) {
+                T_sales_det::create([
+                    'sales_id' => $transaction->id, // Use the ID of the newly created transaction
+                    'barang_id' => $item['barang_id'],
+                    'harga_bandrol' => $item['harga_bandrol'],
+                    'qty' => $item['qty'],
+                    'diskon_pct' => $item['diskon_pct'] ?? 0,
+                    'diskon_nilai' => $item['diskon_nilai'],
+                    'harga_diskon' => $item['harga_diskon'],
+                    'total' => $item['total'],
+                ]);
+            }
+
+            // Commit the transaction
+            DB::commit();
+
+            return response()->json(['message' => 'Transaction created successfully'], 201);
+        } catch (\Exception $e) {
+            // Rollback the transaction if something went wrong
+            DB::rollBack();
+            return response()->json(['error' => 'Transaction creation failed', 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function destroy($id)

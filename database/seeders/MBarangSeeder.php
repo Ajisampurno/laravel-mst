@@ -16,11 +16,11 @@ class MBarangSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        foreach (range(1, 10) as $index) {
+        foreach (range(1, 5) as $index) {
             DB::table('m_barangs')->insert([
                 'kode' => $faker->unique()->numerify('BRG###'),
                 'nama' => $faker->name,
-                'harga' => $faker->randomFloat(2, 1000, 100000),
+                'harga' => $faker->randomFloat(1000, 100000),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
