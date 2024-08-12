@@ -55,13 +55,13 @@ class TransaksiController extends Controller
             'ongkir' => 'nullable|numeric',
             'total_bayar' => 'required|numeric',
             'cartItems' => 'required|array',
-            'cartItems.*.barang_id' => 'required|integer',
-            'cartItems.*.diskon_nilai' => 'required|numeric',
+            'cartItems.*.barang_id' => 'nullable|integer',
+            'cartItems.*.diskon_nilai' => 'nullable|numeric',
             'cartItems.*.diskon_pct' => 'nullable|numeric',
-            'cartItems.*.harga_bandrol' => 'required|numeric',
-            'cartItems.*.harga_diskon' => 'required|numeric',
-            'cartItems.*.qty' => 'required|integer',
-            'cartItems.*.total' => 'required|numeric',
+            'cartItems.*.harga_bandrol' => 'nullable|numeric',
+            'cartItems.*.harga_diskon' => 'nullable|numeric',
+            'cartItems.*.qty' => 'nullable|integer',
+            'cartItems.*.total' => 'nullable|numeric',
         ]);
 
         // Start a database transaction
